@@ -22,8 +22,13 @@ The test:
 
 ## How to Run
 
-bash
+```bash
+# Linux / macOS
 ./gradlew test
+
+# Windows
+gradlew.bat test
+```
 
 ## Project Structure
 
