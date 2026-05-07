@@ -4,8 +4,7 @@ Feature: Validate that author retrieved from API matches the author displayed on
     Given user opens OpenLibrary page
     And user sets website language to English
     When user searches for a book by title "<title>"
-    And user selects book with title "<title>" published in "<year>"
-    And user retrieves author from API
+    And user retrieves author from API for book published in "<year>"
     Then author from API matches author on book page
 
     Examples:
