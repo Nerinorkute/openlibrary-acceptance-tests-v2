@@ -13,13 +13,13 @@ public class SearchPage extends BasePage {
     // --- Locators ---
 
     /**
-     * XPath template that matches a search result item by exact title and publication year.
-     * %s placeholders are replaced at runtime: first with title, second with year.
+     * XPath template matching a search result by exact title and publication year.
+     * First %s = title, second %s = year.
      */
-    private static final String BOOK_LINK_XPATH =
+    private static final String RESULT_ITEM_XPATH =
             "//li[contains(@class,'searchResultItem')]" +
                     "[.//a[normalize-space(.)='%s']]" +
-                    "[.//*[contains(.,'%s')]]//div[@class='resultTitle']//a";
+                    "[.//*[contains(.,'%s')]]";
 
     // --- Constructor ---
 
@@ -30,15 +30,34 @@ public class SearchPage extends BasePage {
     // --- Actions ---
 
     /**
-     * Waits for a search result matching both the given title and publication year,
-     * clicks it, and returns the BookPage that opens.
+     * Finds the search result matching title and year,
+     * extracts the book code from the href attribute.
+     * href format: /works/OL.../Title?edition=key%3A/books/OL39029829M
      */
-    public BookPage clickBookByTitleAndYear(String title, String year) {
+    public String getBookCodeFromResult(String title, String year) {
+        WebElement bookLink = getBookItem(title, year)
+                .findElement(By.cssSelector("div.resultTitle a"));
+        String href = bookLink.getAttribute("href");
+        return href.replaceAll(".*books/([^?&\"]+).*", "$1");
+    }
+
+    /**
+     * Finds the search result matching title and year,
+     * returns the author name displayed in the result.
+     */
+    public String getAuthorNameFromResult(String title, String year) {
+        WebElement authorLink = getBookItem(title, year)
+                .findElement(By.cssSelector("span.bookauthor a"));
+        return authorLink.getText();
+    }
+
+    /**
+     * Waits for and returns the search result item matching both title and year.
+     */
+    private WebElement getBookItem(String title, String year) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT));
-        WebElement bookLink = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(BOOK_LINK_XPATH, title, year))
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(RESULT_ITEM_XPATH, title, year))
         ));
-        bookLink.click();
-        return new BookPage(driver);
     }
 }
