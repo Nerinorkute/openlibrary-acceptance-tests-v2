@@ -11,18 +11,17 @@ import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import pageObject.OpenLibraryApiClient;
-import pageObject.BookPage;
 import pageObject.MainPage;
 import pageObject.SearchPage;
 
 public class FindBookSteps {
-
     private WebDriver driver;
     private MainPage mainPage;
     private SearchPage searchPage;
-    private BookPage bookPage;
+    private String currentTitle;
+    private String currentYear;
     private String apiAuthorName;
-
+    
     @Before
     public void setUp() {
         WebDriverManager.chromedriver().setup();
@@ -48,30 +47,26 @@ public class FindBookSteps {
 
     @When("user searches for a book by title {string}")
     public void userSearchesForBookByTitle(String title) {
+        currentTitle = title;
         searchPage = mainPage.userSearchesForBookByTitle(title);
-        System.out.println("Book title: " + title);
     }
 
-    @And("user selects book with title {string} published in {string}")
-    public void userSelectsBookWithTitleAndYear(String title, String year) {
-        bookPage = searchPage.clickBookByTitleAndYear(title, year);
-    }
-
-    @And("user retrieves author from API")
-    public void getAuthorFromApi() {
-        String bookCode = bookPage.getBookCodeFromUrl();
+    @And("user retrieves author from API for book published in {string}")
+    public void userRetrievesAuthorFromApiForBookPublishedIn(String year) {
+        currentYear = year;
+        String bookCode = searchPage.getBookCodeFromResult(currentTitle, currentYear);
         apiAuthorName = new OpenLibraryApiClient().getAuthorNameByBookCode(bookCode);
     }
 
     @Then("author from API matches author on book page")
     public void authorFromApiMatchesUi() {
-        String webAuthorName = bookPage.getAuthorNameFromPage();
-        System.out.println("API author: " + apiAuthorName);
-        System.out.println("WEB author: " + webAuthorName);
+        String webAuthorName = searchPage.getAuthorNameFromResult(currentTitle, currentYear);
         Assertions.assertEquals(
-                apiAuthorName.trim().toLowerCase(),
-                webAuthorName.trim().toLowerCase(),
-                "Author mismatch — API: '" + apiAuthorName + "' | WEB: '" + webAuthorName + "'"
+                apiAuthorName,
+                webAuthorName,
+                "Author mismatch — API: '" + apiAuthorName + "' | WEB: '" + webAuthorName + "'"  
         );
     }
+
+
 }
