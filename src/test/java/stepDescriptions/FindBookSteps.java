@@ -49,6 +49,7 @@ public class FindBookSteps {
     public void userSearchesForBookByTitle(String title) {
         currentTitle = title;
         searchPage = mainPage.userSearchesForBookByTitle(title);
+        System.out.println("Book title: " + title);
     }
 
     @And("user retrieves author from API for book published in {string}")
@@ -56,11 +57,13 @@ public class FindBookSteps {
         currentYear = year;
         String bookCode = searchPage.getBookCodeFromResult(currentTitle, currentYear);
         apiAuthorName = new OpenLibraryApiClient().getAuthorNameByBookCode(bookCode);
+        System.out.println("API author: " + apiAuthorName);
     }
 
     @Then("author from API matches author on book page")
     public void authorFromApiMatchesUi() {
         String webAuthorName = searchPage.getAuthorNameFromResult(currentTitle, currentYear);
+        System.out.println("WEB author: " + webAuthorName);
         Assertions.assertEquals(
                 apiAuthorName,
                 webAuthorName,
